@@ -35,42 +35,117 @@
             <br /><br />
 
             <button type="submit">Start Sniffing</button>
+
+            <div id="loading-spinner" style="display: none; margin-top: 1rem; text-align: center;">
+                <div class="spinner"></div>
+                <p>Sniffing packets...</p>
+            </div>
         </form>
 
         <hr />
 
-        <h2>Results:</h2>
+        <div id="results-container">
+            <h2>Results:</h2>
 
-        {% if results %}
-        <p>Sniffing complete! Found {{ results|length }} packets.</p>
+            {% if results %}
+            <p>Sniffing complete! Found {{ results|length }} packets.</p>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Protocol</th>
-                    <th>Source IP</th>
-                    <th>Destination IP</th>
-                    <th>Summary</th>
-                </tr>
-            </thead>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Protocol</th>
+                        <th>Source IP</th>
+                        <th>Destination IP</th>
+                        <th>Summary</th>
+                    </tr>
+                </thead>
 
-            <tbody>
-                {% for packet in results %}
-                <tr>
-                    <td>{{ packet.proto}}</td>
-                    <td>{{ packet.src }}</td>
-                    <td>{{ packet.dst }}</td>
-                    <td>{{ packet.summary}} </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                <tbody>
+                    {% for packet in results %}
+                    <tr>
+                        <td>{{ packet.proto}}</td>
+                        <td>{{ packet.src }}</td>
+                        <td>{{ packet.dst }}</td>
+                        <td>{{ packet.summary}} </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
 
-    {% else %}
-        <p>No packets captured yet. Adjust settings and click "Start Sniffing".</p>
+            {% else %}
+            <p>No packets captured yet. Adjust settings and click "Start Sniffing".</p>
 
-    {% endif %}
+            {% endif %}
+        </div>
 
     </div>
+    <script>
+        const form = document.querySelector('form');
+        const spinner = document.getElementById('loading-spinner');
+        const resultsContainer = document.getElementById('results-container');
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            spinner.style.display = 'block';
+            resultsContainer.innerHTML = '';
+
+            const formData = new FormData(form);
+            const data = {
+                filter: formData.get('filter'),
+                count: formData.get('count'),
+                timeout: formData.get('timeout')
+            };
+
+            fetch('/start-sniff', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+                .then(response => response.json())
+                .then(results => {
+                    console.log('Receieved results:', results);
+                    spinner.style.display = 'none';
+
+                    if (results && results.length > 0) {
+                        let tableHTML = `
+                    <p> Sniffing complete! Found ${results.length} packets.</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Protocol</th>
+                                <th>Source IP</th>
+                                <th>Destination IP</th>
+                                <th>Summary</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                    `;
+                        results.forEach(packet => {
+                            tableHTML += `
+                            <tr>
+                                <td>${packet.proto}</td>
+                                <td>${packet.src}</td>               
+                                <td>${packet.dst}</td>
+                                <td>${packet.summary}</td>
+                            </tr>
+                        `;
+                        });
+                        tableHTML += '</tbody></table>';
+                        resultsContainer.innerHTML = tableHTML;
+                    } else {
+                        resultsContainer.innerHTML = '<p>No packets were captured in the given time.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    spinner.style.display = 'none';
+                    resultsContainer.innerHTML = '<p style="color: red;">An error occurred during sniffing.</p>';
+                });
+        });
+
+    </script>
 </body>
 </html>
