@@ -17,21 +17,21 @@
 
             <label for="filter">Choose a filter:</label>
             <select name="filter" id="filter">
-                <option value="">Sniff All Packets</option>
-                <option value="icmp">1. ICMP</option>
-                <option value="udp">2. UDP</option>
-                <option value="http">3. HTTP (TCP Port 80)</option>
-                <option value="dns">4. DNS (UDP Port 53)</option>
-                <option value="tcp">5. TCP</option>
+                <option value="" {% if filter_val == '' %}selected{% endif %}>Sniff All Packets</option>
+                <option value="icmp" {% if filter_val == 'icmp' %}selected{% endif %}>1. ICMP</option>
+                <option value="udp" {% if filter_val == 'udp' %}selected{% endif %}>2. UDP</option>
+                <option value="tcp port 80" {% if filter_val == 'tcp port 80' %}selected{% endif %}>3. HTTP (TCP Port 80)</option>
+                <option value="udp port 53" {% if filter_val == 'udp port 53' %}selected{% endif %}>4. DNS (UDP Port 53)</option>
+                <option value="tcp" {% if filter_val == 'tcp' %}selected{% endif %}>5. TCP</option>
             </select>
             <br /><br />
 
             <label for="count">Packet Count:</label>
-            <input type="number" id="count" name="count" value="10" required />
+            <input type="number" id="count" name="count" value="{{ count_val }}" required />
             <br /><br />
 
             <label for="timeout">Timeout (seconds):</label>
-            <input type="number" id="timeout" name="timeout" value="10" required />
+            <input type="number" id="timeout" name="timeout" value="{{ timeout_val }}" required />
             <br /><br />
 
             <button type="submit">Start Sniffing</button>
@@ -43,14 +43,33 @@
 
         {% if results %}
         <p>Sniffing complete! Found {{ results|length }} packets.</p>
-        <ul>
-            {% for packet_summary in results %}
-            <li>{{ packet_summary }}</li>
-            {% endfor %}
-        </ul>
-        {% else %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Protocol</th>
+                    <th>Source IP</th>
+                    <th>Destination IP</th>
+                    <th>Summary</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for packet in results %}
+                <tr>
+                    <td>{{ packet.proto}}</td>
+                    <td>{{ packet.src }}</td>
+                    <td>{{ packet.dst }}</td>
+                    <td>{{ packet.summary}} </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    {% else %}
         <p>No packets captured yet. Adjust settings and click "Start Sniffing".</p>
-        {% endif %}
+
+    {% endif %}
 
     </div>
 </body>
