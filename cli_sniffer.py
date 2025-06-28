@@ -1,16 +1,4 @@
-from scapy.all import sniff
 
-def packet_callback(packet):
-    print(packet.summary())
-
-def start_sniffing(filter, count, timeout):
-    packets = sniff(
-        filter=filter,
-        prn=packet_callback,
-        count=count,
-        timeout=timeout
-        )
-    return packets
 
 def sniff_menu():
 

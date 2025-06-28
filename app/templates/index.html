@@ -1,0 +1,54 @@
+﻿<!-- Kitchen and Plate, content shown to user! -->
+
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Packet Sniffer</title>
+</head>
+<body>
+    <h1>Packet Sniffer Dashboard</h1>
+    
+    <form action="/" method="POST">
+
+        <label for="filter">Choose a filter:</label>
+        <select name="filter" id="filter">
+            <option value="">Sniff All Packets</option>
+            <option value="icmp">1. ICMP</option>
+            <option value="udp">2. UDP</option>
+            <option value="http">3. HTTP (TCP Port 80)</option>
+            <option value="dns">4. DNS (UDP Port 53)</option>
+            <option value="tcp">5. TCP</option>
+        </select>
+        <br /><br />
+
+        <label for="count">Packet Count:</label>
+        <input type="number" id="count" name="count" value="10" required />
+        <br /><br />
+
+        <label for="timeout">Timeout (seconds):</label>
+        <input type="number" id="timeout" name="timeout" value="10" required />
+        <br /><br />
+
+        <button type="submit">Start Sniffing</button>
+    </form>
+
+    <hr />
+
+    <h2>Results:</h2>
+
+    {% if results %}
+        <p>Sniffing complete! Found {{ results|length }} packets.</p>
+        <ul>
+            {% for packet_summary in results %}
+                <li>{{ packet_summary }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No packets captured yet. Adjust settings and click "Start Sniffing".</p>
+    {% endif %}
+
+</body>
+</html>
